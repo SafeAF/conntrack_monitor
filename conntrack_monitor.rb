@@ -4,8 +4,9 @@ require 'set'
 require 'resolv'
 require 'open3'
 
-# File to store processed IPs
+# File to store processed IPs and log all connections
 TMP_FILE = "/tmp/processed_ips.txt"
+LOG_FILE = "/var/log/connection_monitor.log"
 
 # Initialize a set to track processed IPs
 processed_ips = Set.new
@@ -52,10 +53,14 @@ loop do
     if hostname == "Unknown"
       # Get organization info if hostname is unknown
       org = get_whois_org(ip)
-      puts "#{ip} -> #{hostname} (Org: #{org})"
+      log_entry = "#{ip} -> #{hostname} (Org: #{org})"
     else
-      puts "#{ip} -> #{hostname}"
+      log_entry = "#{ip} -> #{hostname}"
     end
+
+    # Print to screen and log to file
+    puts log_entry
+    File.open(LOG_FILE, "a") { |file| file.puts(log_entry) }
   end
 
   # Sleep before the next iteration
